@@ -23,12 +23,12 @@ def proof_of_work(last_proof):
     start = timer()
 
     print("Searching for next proof")
-    proof = 0
+    proof = 1000000
     #  TODO: Your code here
     proof_string = f"{last_proof}".encode()
     last_hash = hashlib.sha256(proof_string).hexdigest()
     while not valid_proof(last_hash, proof):
-        proof += random.randrange(1,100)
+        proof += random.randrange(1, 100)
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
@@ -71,15 +71,23 @@ if __name__ == '__main__':
     # Run forever until interrupted
     while True:
         # Get the last proof from the server
-        r = requests.get(url=node + "/last_proof")
-        data = r.json()
+        try:
+            r = requests.get(url=node + "/last_proof")
+            data = r.json()
+        except:
+            continue
+
         new_proof = proof_of_work(data.get('proof'))
 
         post_data = {"proof": new_proof,
                      "id": id}
 
-        r = requests.post(url=node + "/mine", json=post_data)
-        data = r.json()
+        try:
+            r = requests.post(url=node + "/mine", json=post_data)
+            data = r.json()
+        except:
+            continue
+
         if data.get('message') == 'New Block Forged':
             coins_mined += 1
             print("Total coins mined: " + str(coins_mined))
