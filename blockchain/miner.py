@@ -12,7 +12,7 @@ import random
 
 def proof_of_work(last_proof):
     """
-    Multi-Ouroboros of Work Algorithm
+    Multi-Ouroboros of Work Algorithm 
     - Find a number p' such that the last five digits of hash(p) are equal
     to the first five digits of hash(p')
     - IE:  last_hash: ...AE912345, new hash 12345888...
