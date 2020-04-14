@@ -12,7 +12,7 @@ import random
 
 def proof_of_work(last_proof):
     """
-    Multi-Ouroboros of Work Algorithm
+    Multi-Ouroboros of Work Algorithm 
     - Find a number p' such that the last five digits of hash(p) are equal
     to the first five digits of hash(p')
     - IE:  last_hash: ...AE912345, new hash 12345888...
@@ -23,8 +23,12 @@ def proof_of_work(last_proof):
     start = timer()
 
     print("Searching for next proof")
-    proof = 0
+    proof = 1000000
     #  TODO: Your code here
+    proof_string = f"{last_proof}".encode()
+    last_hash = hashlib.sha256(proof_string).hexdigest()
+    while not valid_proof(last_hash, proof):
+        proof += random.randrange(1, 100)
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
@@ -40,7 +44,10 @@ def valid_proof(last_hash, proof):
     """
 
     # TODO: Your code here!
-    pass
+    proof_string = f"{proof}".encode()
+    current_hash = hashlib.sha256(proof_string).hexdigest()
+    return last_hash[-5:] == current_hash[:5]
+    
 
 
 if __name__ == '__main__':
@@ -64,15 +71,23 @@ if __name__ == '__main__':
     # Run forever until interrupted
     while True:
         # Get the last proof from the server
-        r = requests.get(url=node + "/last_proof")
-        data = r.json()
+        try:
+            r = requests.get(url=node + "/last_proof")
+            data = r.json()
+        except:
+            continue
+
         new_proof = proof_of_work(data.get('proof'))
 
         post_data = {"proof": new_proof,
                      "id": id}
 
-        r = requests.post(url=node + "/mine", json=post_data)
-        data = r.json()
+        try:
+            r = requests.post(url=node + "/mine", json=post_data)
+            data = r.json()
+        except:
+            continue
+
         if data.get('message') == 'New Block Forged':
             coins_mined += 1
             print("Total coins mined: " + str(coins_mined))
